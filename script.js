@@ -5,7 +5,7 @@ document.getElementById("downloadForm").addEventListener("submit", function (e) 
     const type = document.getElementById("type").value;
     const quality = document.getElementById("quality").value;
   
-    fetch("/download", {
+    fetch("https://youtubedown-backend.onrender.com/download", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
