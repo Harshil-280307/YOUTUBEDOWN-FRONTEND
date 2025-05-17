@@ -1,7 +1,9 @@
 document.getElementById("downloadForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const url = document.getElementById("url").value;
-  
+  const type = document.getElementById("type").value;
+  const quality = document.getElementById("quality").value;
+
   const message = document.getElementById("message");
   message.innerText = "Downloading...";
 
@@ -11,7 +13,7 @@ document.getElementById("downloadForm").addEventListener("submit", async (e) => 
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ url }),
+      body: JSON.stringify({ url, type, quality }),
     });
 
     if (!response.ok) {
@@ -21,10 +23,9 @@ document.getElementById("downloadForm").addEventListener("submit", async (e) => 
 
     const blob = await response.blob();
     const downloadUrl = URL.createObjectURL(blob);
-
     const a = document.createElement("a");
     a.href = downloadUrl;
-    a.download = "video.mp4";
+    a.download = type === "audio" ? "audio.mp3" : "video.mp4";
     a.click();
     URL.revokeObjectURL(downloadUrl);
     message.innerText = "Download started!";
