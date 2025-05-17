@@ -1,45 +1,34 @@
-const BACKEND_URL = 'https://youtubedown-backend.onrender.com'; // 🔁 Replace with your actual Render backend URL
-
-document.getElementById("downloadForm").addEventListener("submit", function (e) {
+document.getElementById("downloadForm").addEventListener("submit", async (e) => {
   e.preventDefault();
+  const url = document.getElementById("url").value;
+  
+  const message = document.getElementById("message");
+  message.innerText = "Downloading...";
 
-  const url = document.getElementById("url").value.trim();
-  const type = document.getElementById("type").value;
-  const quality = document.getElementById("quality").value;
+  try {
+    const response = await fetch("https://youtubedown-backend.onrender.com/download", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ url }),
+    });
 
-  if (!url) {
-    document.getElementById("message").innerText = "❌ Please enter a valid YouTube URL.";
-    return;
-  }
-
-  document.getElementById("message").innerText = "⏳ Downloading, please wait...";
-
-  fetch(`${BACKEND_URL}/download`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ url, type, quality })
-  })
-  .then(res => {
-    if (!res.ok) {
-      throw new Error("Server error: " + res.statusText);
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || "Failed to download.");
     }
-    return res.blob();
-  })
-  .then(blob => {
-    const downloadUrl = window.URL.createObjectURL(blob);
+
+    const blob = await response.blob();
+    const downloadUrl = URL.createObjectURL(blob);
+
     const a = document.createElement("a");
     a.href = downloadUrl;
-    a.download = "youtube_download." + (type === "audio" ? "mp3" : "mp4");
-    document.body.appendChild(a);
+    a.download = "video.mp4";
     a.click();
-    a.remove();
-
-    document.getElementById("message").innerText = "✅ Download started!";
-  })
-  .catch(err => {
-    console.error("❌ Download failed:", err);
-    document.getElementById("message").innerText = "❌ Failed to download. Check the URL or try again.";
-  });
+    URL.revokeObjectURL(downloadUrl);
+    message.innerText = "Download started!";
+  } catch (err) {
+    message.innerText = `Error: ${err.message}`;
+  }
 });
